@@ -1,3 +1,7 @@
+import { Route } from "wouter";
+
+import Navbar from "./components/layout/Navbar";
+import Landing from "./views/Landing";
 import Page from './components/three/Page';
 import Game from './components/three/Game';
 import './App.css';
@@ -17,31 +21,41 @@ const pixis = {
 }
 function App() {
   return (
-    <Page
-      title="Pixi Land"
-      items={[
-        [
-          "The pixis live in the forest...",
-          "...and they are always on the move!"
-        ],
-        [
-          <Character image="img/nft/blue.png" />,
-          <Character image="img/nft/blue.png" hp={30} />,
-          <Character image="img/nft/green.png" />
-        ],
-        [
-          <Character image="img/nft/pink.png" />,
-          <Character image="img/nft/red.png" />,
-          <Character image="img/nft/yellow.png" />
-        ],
-        [
-          "There are even special pixis...",
-          "...with magical powers!"
-        ],
-        <Character image="img/nft/oracle.png" hp={100} />,
+    <>
+      <Route path="/">
+        <>
+          <Navbar />
+          <Landing />
+        </>
+      </Route>
+      <Route path="/game">
+      <Page
+          title="Pixi Land"
+          items={[
+            [
+              "The pixis live in the forest...",
+              "...and they are always on the move!"
+            ],
+            [
+              <Character image="img/nft/blue.png" />,
+              <Character image="img/nft/blue.png" hp={30} />,
+              <Character image="img/nft/green.png" />
+            ],
+            [
+              <Character image="img/nft/pink.png" />,
+              <Character image="img/nft/red.png" />,
+              <Character image="img/nft/yellow.png" />
+            ],
+            [
+              "There are even special pixis...",
+              "...with magical powers!"
+            ],
+            <Character image="img/nft/oracle.png" hp={100} />,
 
-      ]}
-    />
+          ]}
+        />
+      </Route>
+    </>
   );
 }
 
