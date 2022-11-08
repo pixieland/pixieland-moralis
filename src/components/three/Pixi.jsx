@@ -26,7 +26,7 @@ export default function Pixi({ pixi: { image, color, hp }, ...props }) {
 
   return (
     <Float ref={pixi} speed={2} floatIntensity={1} {...props}>
-      <Plane args={[5, 5]} rotation-x={-102}>
+      <Plane args={[5, 5]}>
         <MeshWobbleMaterial
           attach="material"
           factor={.2} // Strength, 0 disables the effect (default=1)
@@ -36,7 +36,7 @@ export default function Pixi({ pixi: { image, color, hp }, ...props }) {
           transparent
         />
       </Plane>
-      <Sparkles count={hp} scale={3} size={2.5} />
+      <Sparkles count={hp * 2} scale={4} size={7} color={color} opacity={.5} />
     </Float>
   )
 }

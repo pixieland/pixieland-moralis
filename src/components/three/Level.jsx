@@ -129,16 +129,14 @@ function Log({ image, speed = .005, ...props }) {
     )
 }
 
-function ImageFrame({ image, speed = .005, ticks = 1, ...props }) {
+function ImageFrame({ image, speed = .005, ...props }) {
     const texture = useTexture(image)
     const frame = useRef()
+    const picture = useRef()
     useFrame(({ mouse, viewport }, elapsedTime) => {
-        ticks--
-        //if (ticks === 0) {
-        //    ticks = 1
-        //}
         frame.current.scale.x = THREE.MathUtils.lerp(frame.current.scale.x, 1, speed)
         frame.current.scale.y = THREE.MathUtils.lerp(frame.current.scale.y, 1, speed)
+        picture.current.material.color = null
     })
     return (
 
@@ -147,7 +145,7 @@ function ImageFrame({ image, speed = .005, ticks = 1, ...props }) {
                 <planeGeometry args={[1100, 1100, 5, 5]} />
                 <meshStandardMaterial color="DarkSlateGray" />
             </mesh>
-            <mesh>
+            <mesh ref={picture}>
                 <planeGeometry args={[1024, 1024, 1, 1]} />
                 <meshStandardMaterial map={texture} color="goldenrod" />
             </mesh>
