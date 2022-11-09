@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Route } from "wouter";
 
 import Navbar from "./components/layout/Navbar";
 import Landing from "./views/Landing";
+import Marketplace from './views/Marketplace';
 import Page from './components/three/Page';
 import Game from './components/three/Game';
 import './App.css';
@@ -20,11 +22,28 @@ const pixis = {
   1738986: "images/pixis/pink.png"
 }
 function App() {
+  const [ethaddress, setETHAddress] = useState("");
+  const [ethProvider, setEthProvider] = useState(null);
+  const [contractNFT, setContractNFT] = useState(null);
+
   return (
     <>
+      <Route path="/marketplace">
+        <>
+        <Navbar
+          ethaddress={ethaddress}
+          setETHAddress={setETHAddress}
+          setEthProvider={setEthProvider}
+          setContractNFT={setContractNFT} />
+          <Marketplace contractNFT={contractNFT} />
+        </>
+      </Route>
       <Route path="/">
         <>
-          <Navbar />
+        <Navbar
+          ethaddress={ethaddress}
+          setETHAddress={setETHAddress}
+          setEthProvider={setEthProvider} />
           <Landing />
         </>
       </Route>

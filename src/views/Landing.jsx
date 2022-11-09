@@ -31,7 +31,15 @@ export default function Landing() {
           </div>
         </div>
         
-        
+        <div className='d-flex align-items-center'>
+          <img src={Pixie1} alt="Pixie1" style={{ width: '400px', marginTop: '-2rem', zIndex: '2' }} />
+          <div>
+            <h2 className='mt-4'>EXPLORE PIXIELAND AND EXPERIENCE A MAGICAL WORLD FILLED WITH BEAUTIFUL AND FASCINATING CREATURES</h2>
+            <button className='btn btn-danger btn-lg mt-3'>
+              Explore
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )
