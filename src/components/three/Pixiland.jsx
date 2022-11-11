@@ -1,17 +1,19 @@
 import * as THREE from "three"
 import * as RAPIER from "@dimforge/rapier3d-compat"
+import { useLocation } from "wouter"
 import { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import { Canvas, useThree, useFrame } from "@react-three/fiber"
-import { Bounds, Sampler, Edges, Sky, Float, Plane, MeshDistortMaterial, MeshWobbleMaterial, Sparkles, Trail, PointerLockControls, KeyboardControls, useKeyboardControls, useTexture } from "@react-three/drei"
+import { Bounds, Sampler, Edges, Sky, OrbitControls, Float, Plane, MeshDistortMaterial, MeshWobbleMaterial, Sparkles, Trail, PointerLockControls, KeyboardControls, useKeyboardControls, useTexture } from "@react-three/drei"
 import { CapsuleCollider, CuboidCollider, RigidBody, useRapier, Physics } from "@react-three/rapier"
 import Perlin from 'perlin.js'
 import { levels } from "./Level"
 import { pixis } from "./Pixi"
+import ImageFrame from "./PictureFrame"
 
 Perlin.seed(Math.random())
 
 const SPEED = 18
-const direction = new THREE.Vector3()
+const COUNT = 20
 const frontVector = new THREE.Vector3()
 const sideVector = new THREE.Vector3()
 const rotation = new THREE.Vector3()
@@ -22,13 +24,17 @@ const grassGeometry = new THREE.ConeGeometry(0.05, 1.0, 2, 20, false, 0, Math.PI
 const randomIndex = (items) => Math.floor(Math.random() * items.length - 1 | 0)
 
 export default function Game() {
+    const [, setLocation] = useLocation()
+    const navigate = useMemo(() => (level) => setLocation(`/game#${level}`), [setLocation])
     return (
         <KeyboardControls
             map={[
-                { name: "forward", keys: ["ArrowUp", "w", "W"] },
-                { name: "backward", keys: ["ArrowDown", "s", "S"] },
-                { name: "left", keys: ["ArrowLeft", "a", "A"] },
-                { name: "right", keys: ["ArrowRight", "d", "D"] },
+                { name: "forward", keys: ["ArrowUp", "w", "W", "8"] },
+                { name: "backward", keys: ["ArrowDown", "s", "S", "2"] },
+                { name: "strafe_left", keys: ["a", "A"] },
+                { name: "strafe_right", keys: ["d", "D"] },
+                { name: "left", keys: ["ArrowLeft", "4"] },
+                { name: "right", keys: ["ArrowRight", "6"] },
                 { name: "jump", keys: ["Space"] },
                 { name: "shoot", keys: ["t"] },
                 { name: "fly", keys: ["f"] },
@@ -38,21 +44,16 @@ export default function Game() {
                 <ambientLight intensity={0.6} />
                 <pointLight castShadow intensity={0.8} position={[100, 100, 100]} />
                 <Physics gravity={[0, -30, 0]} colliders={false}>
-                    <Ground image={"img/log.png"} />
-                    <Gallery images={levels.slice(randomIndex(levels), randomIndex(levels))} />
-                    <Walk position={[0, 2, 17]}>
-                        <Pixi image="img/nft/oracle.png" />
-                    </Walk>
-                    <Follow>
-                        <Pixi image="img/nft/red.png" />
-                    </Follow>
+                    <Ground image={"/img/log.png"} />
+                    <Gallery radius={COUNT} items={levels.slice(randomIndex(levels) - COUNT, COUNT)} onSelect={navigate} />
                     <Player>
-                        <ImageFrame image={"img/bkg/download (90).jpg"} />
+                        <Pixi />
                     </Player>
-                    <Crowd items={Array(200).fill(0).map(n => pixis[randomIndex(pixis)])} />
+                    <Crowd items={Array(100).fill(0).map(n => pixis[randomIndex(pixis)])} />
                     <Swarm items={Array(200).fill(0).map(n => pixis[randomIndex(pixis)])} />
                 </Physics>
                 <PointerLockControls />
+                {/* <OrbitControls /> */}
             </Canvas>
         </KeyboardControls>
     )
@@ -78,7 +79,7 @@ export function Ground({ image, props }) {
     )
 }
 
-export function Swarm({ width = 1024, height = 768, children, count = 50, items = Array(count).fill({}), ...props }) {
+export function Swarm({ width = 2000, height = 2000, children, count = 50, items = Array(count).fill({}), ...props }) {
     return (
         <group {...props}>
             <mesh position={[0, 25, 0]}>
@@ -125,7 +126,7 @@ export function Fly({ factor = .5, children, ...props }) {
     )
 }
 
-export function Crowd({ width = 1024, height = 768, children, count = 50, items = Array(count).fill({}), ...props }) {
+export function Crowd({ width = 500, height = 500, children, count = 50, items = Array(count).fill({}), ...props }) {
     return (
         <group {...props}>
             <mesh position={[0, 0, 0]}>
@@ -163,7 +164,7 @@ export function Walk({ to = [
         mesh.current.rotation.y = (t * Math.PI) / 2
         //const p = Perlin.perlin3(mesh.current.position.x, mesh.current.position.y, mesh.current.position.z)
         rotation.set(to[0], to[1], to[2])
-        if(rotation.distanceTo(mesh.current.position) > 1) {
+        if (rotation.distanceTo(mesh.current.position) > 1) {
             mesh.current.position.x = THREE.MathUtils.lerp(mesh.current.position.x, to[0], factor)
             mesh.current.position.z = THREE.MathUtils.lerp(mesh.current.position.z, to[2], factor)
         } else {
@@ -198,7 +199,6 @@ export function Follow({ factor = .01, children, ...props }) {
         group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, position.x, factor)
         group.current.position.y = THREE.MathUtils.lerp(group.current.position.y, position.y, factor)
         group.current.position.z = THREE.MathUtils.lerp(group.current.position.z, position.z, factor)
-        //group.current.rotation.y = (t * Math.PI) / 2
     })
     return (
         <group ref={group} position-y={2} {...props}>
@@ -210,7 +210,7 @@ export function Follow({ factor = .01, children, ...props }) {
     )
 }
 
-export function Pixi({ image = "img/nft/red.png", power = 100, factor = .1, color = "hotpink", double, ...props }) {
+export function Pixi({ image = "/img/nft/red.png", power = 100, factor = .1, color = "hotpink", double, ...props }) {
     const texture = useTexture(image)
     return (
         <mesh {...props}>
@@ -246,35 +246,27 @@ export function Pixi({ image = "img/nft/red.png", power = 100, factor = .1, colo
 }
 
 export function Player({ children }) {
-    const held = useRef()
+    const person = useRef()
     const ref = useRef()
     const [isFlying, flying] = useState(false)
     const rapier = useRapier()
     const { camera } = useThree()
     const [, get] = useKeyboardControls()
     useFrame((state) => {
-        const { forward, backward, left, right, jump, fly } = get()
+        const { forward, backward, strafe_left, strafe_right, left, right, jump, fly } = get()
         const velocity = ref.current.linvel()
         const direction = camera.getWorldDirection(rotation)
         // update camera
         camera.position.set(...ref.current.translation())
-        // held object
-        if (held.current) {
-            held.current.rotation.copy(camera.rotation)
-            held.current.position.copy(camera.position).add(camera.getWorldDirection(rotation).multiplyScalar(1))
-        }
-        if (backward - forward) {
-            direction.y = 0
-            direction.normalize()
-            const force = Math.sin((velocity.length() > 1) * state.clock.elapsedTime * 10) / 6
-            held.current.rotation.z = THREE.MathUtils.lerp(held.current.rotation.z, force, 0.1)
-        } else {
-            //held.current.rotation.z = -0.5
-            //onPointerMissed={(e) => (held.current.children[0].rotation.z = -0.5)}
-        }
         // movement
         frontVector.set(0, 0, backward - forward)
-        sideVector.set(left - right, 0, 0)
+        if (Math.abs(left - right)) {
+            if (!camera.current.rotation) {
+                camera.current.rotation = new THREE.Euler()
+            }
+            camera.current.rotation.y = THREE.MathUtils.lerp(camera.current.rotation.y, (left - right) * 0.1, 0.1)
+        }
+        sideVector.set(strafe_left - strafe_right, 0, 0)
         direction.subVectors(frontVector, sideVector).normalize().multiplyScalar(isFlying ? SPEED * 2 : SPEED).applyEuler(camera.rotation)
         ref.current.setLinvel({
             x: isFlying ? THREE.MathUtils.lerp(direction.x, velocity.x, 0.1) : direction.x,
@@ -289,27 +281,32 @@ export function Player({ children }) {
         if (jump && grounded) ref.current.setLinvel({ x: 0, y: 7.5, z: 0 })
         else if (jump && isFlying) ref.current.setLinvel({ x: 0, y: Math.min(15, velocity.y + 2.5), z: 0 })
         if (isFlying && grounded && direction.y < 1) flying(false)
+        //if(isFlying){
+        //    person.current.position.z = 1
+        //    person.current.position.x = THREE.MathUtils.lerp(person.current.position.x, ref.current.translation().x, 0.1)
+        //    person.current.position.y = THREE.MathUtils.lerp(person.current.position.y, ref.current.translation().y, 0.1)
+        //} else {
+        //    person.current.position.z = -3
+        //}
     })
     return (
         <>
             <RigidBody ref={ref} colliders={false} mass={1} type="dynamic" position={[0, 10, 0]} enabledRotations={[false, false, false]}>
                 <CapsuleCollider args={[0.75, 0.5]} />
-            </RigidBody>
-            <group ref={held} position={[0, 0, 0]}>
-                <mesh position={[0.5, -0.5, -0.5]} scale={[.0005, .0005, .0005]}>
+                {/* <mesh ref={person} position={[-1.5, 0, -10]} scale={[.6, .6, .1]} rotation-x={Math.PI / 4}>
                     {children}
-                </mesh>
-            </group>
+                </mesh> */}
+            </RigidBody>
         </>
     )
 }
 
-export function Gallery({ items = Array(10).fill("img/forest.png"), radius = items.length, ...props }) {
+export function Gallery({ items = Array(10).fill("/img/forest.png"), onSelect, radius = items.length, ...props }) {
     const frames = useMemo(() => {
         const curve = new THREE.EllipseCurve(0, 0, radius, radius)
         const points = curve.getPoints(items.length - 1)
         return points.map(({ x, y }, index) => ({
-            position: [x, 2, y],
+            position: [x, 3.5, y],
             rotation: [0, Math.PI / 2.5, 0],
             url: items[index]
         }))
@@ -318,42 +315,13 @@ export function Gallery({ items = Array(10).fill("img/forest.png"), radius = ite
         <group {...props}>
             {frames.map((frame, i) => (
                 <mesh key={i} position={frame.position} rotation={frame.rotation} scale={[.005, .005, .005]}>
-                    <ImageFrame image={frame.url} />
+                    <ImageFrame
+                        image={frame.url}
+                        scale={[.2, .2, .1]}
+                        onClick={onSelect.bind(null, i)} />
                 </mesh>
             ))}
         </group>
-    )
-}
-
-function ImageFrame({ image, ...props }) {
-    const texture = useTexture(image)
-    const { camera } = useThree()
-    const frame = useRef()
-    useFrame(() => {
-        frame.current.lookAt(camera.position)
-    })
-    return (
-
-        <group ref={frame} rotation-y={1} {...props}>
-            <mesh>
-                <planeGeometry args={[1100, 1100, 5, 5]} />
-                <meshStandardMaterial color="Goldenrod" side={THREE.DoubleSide} />
-            </mesh>
-            <mesh position={[0, 5, 10]}>
-                <planeGeometry args={[1024, 768, 1, 1]} />
-                {/* <meshStandardMaterial map={texture} /> */}
-                <MeshWobbleMaterial
-                    attach="material"
-                    factor={.03} // Strength, 0 disables the effect (default=1)
-                    speed={2} // Speed (default=1)
-                    roughness={0}
-                    map={texture}
-                    transparent
-                    side={THREE.DoubleSide}
-                />
-            </mesh>
-        </group>
-
     )
 }
 

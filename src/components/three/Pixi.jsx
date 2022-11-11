@@ -5,12 +5,12 @@ import { useTexture, Sphere, Plane, MeshWobbleMaterial, Sparkles, Trail, Float, 
 import { useEffect } from 'react'
 
 export const pixis = [
-  { image: "img/nft/green.png", color: "green", hp: 10 },
-  { image: "img/nft/blue.png", color: "blue", hp: 10 },
-  { image: "img/nft/red.png", color: "red", hp: 20 },
-  { image: "img/nft/yellow.png", color: "yellow", hp: 20 },
-  { image: "img/nft/pink.png", color: "hotpink", hp: 50 },
-  { image: "img/nft/oracle.png", color: "orange", hp: 100 }
+  { image: "/img/nft/green.png", color: "green", hp: 10 },
+  { image: "/img/nft/red.png", color: "red", hp: 20 },
+  { image: "/img/nft/blue.png", color: "blue", hp: 10 },
+  { image: "/img/nft/yellow.png", color: "yellow", hp: 20 },
+  { image: "/img/nft/pink.png", color: "hotpink", hp: 50 },
+  { image: "/img/nft/oracle.png", color: "orange", hp: 100 }
 ]
 
 export default function Pixi({ pixi: { image, color, hp }, ...props }) {

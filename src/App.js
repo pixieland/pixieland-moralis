@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Route } from "router";
+import { Route, Switch } from "wouter";
 import Navbar from "./components/layout/Navbar";
 import Landing from "./views/Landing";
 import Marketplace from './views/Marketplace';
-import Page from './components/three/Page';
 import Game from './components/three/Game';
 import React from 'react';
 import './App.css';
@@ -15,7 +14,7 @@ function App() {
   const [contractNFT, setContractNFT] = useState(null);
 
   return (
-    <>
+    <Switch>
       <Route path="/marketplace">
         <>
         <Navbar
@@ -35,10 +34,13 @@ function App() {
           <Landing />
         </>
       </Route>
-      <Route path="/game">
+      <Route path="/pixiland">
          <Pixiland />
       </Route>
-    </>
+      <Route path="/game">
+        <Game />
+      </Route>
+    </Switch>
   ); 
   
 }
