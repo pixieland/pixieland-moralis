@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import React, { useRef, useState } from 'react';
 import { useTexture } from '@react-three/drei'
 
-export default function PictureFrame({ image, speed = 0, ...props }) {
+export default function PictureFrame({ image, nolook, speed = 0, ...props }) {
     const picture_frame = useTexture("/img/picture_frame.png")
     const [size, setSize] = useState(1)
     const { camera } = useThree()
@@ -16,7 +16,7 @@ export default function PictureFrame({ image, speed = 0, ...props }) {
             if (frame.current.scale.x > size - .01) {
                 setSize(size + 1)
             }
-        }else{
+        } else if (!nolook) {
             frame.current.lookAt(camera.position)
         }
     })

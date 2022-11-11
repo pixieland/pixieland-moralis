@@ -1,4 +1,5 @@
-import { OrbitControls, Bounds, Stars, Center, Text, Text3D, MeshReflectorMaterial } from '@react-three/drei';
+import * as THREE from 'three'
+import { OrbitControls, Float, MeshWobbleMaterial, useTexture, Sparkles, Plane, Bounds, Stars, Center, Text, Text3D, MeshReflectorMaterial } from '@react-three/drei';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { Flex, Box } from '@react-three/flex';
 import React, { useEffect, useRef, useMemo, useState, Suspense } from 'react';
@@ -13,7 +14,7 @@ const nextIndex = (items, index) => index < items.length - 1 ? index + 1 : 0
 
 const current_level = window.location.hash ? parseInt(window.location.hash.replace('#', '')) : 0
 
-export default function Game({ level = current_level }) {
+export default function Game({ level = (current_level || randomIndex(levels)) }) {
   const [play, setPlay] = React.useState(false)
   const [pixi, setPixi] = React.useState(1)
   const player = useMemo(() => pixis[pixi], [pixi])
@@ -29,8 +30,9 @@ export default function Game({ level = current_level }) {
       <directionalLight intensity={1} />
       <ambientLight intensity={.7} />
 
-      <Scoreboard level={level + 1} pixi={player} position={[1, 2.5, 0]} rotation={[0.3, 0, 0]}>
-        {/* <ImageFrame image={levels[level]} scale={[.0001,.0001,.1]} /> */}
+      <Scoreboard level={level + 1} pixi={player} position={[0, 3.5, -2]} rotation={[0.35, 0, 0]}>
+        <Sprite image={player.image} hp={player.hp} color={player.color} position={[7.9, 3.3, 0]} />
+        <ImageFrame image={levels[level]} nolook scale={[.0003, .0003, 1]} position={[8.5, 3.5, -1]} rotation={[0.35, 0, 0]} />
       </Scoreboard>
 
       <Level level={level + 1} />
@@ -42,29 +44,27 @@ export default function Game({ level = current_level }) {
 
       <Stars radius={500} depth={10} count={1000} factor={1} />
 
-      <OrbitControls zoomSpeed={1} />
+      {/* <OrbitControls zoomSpeed={1} /> */}
 
     </Canvas>
   );
 }
 
-function Title(props) {
+function Sprite({ image, hp, color, ...props }) {
+  const texture = useTexture(image)
   return (
-    <Center {...props}>
-      <Text3D
-        curveSegments={32}
-        bevelEnabled
-        bevelSize={0.04}
-        bevelThickness={0.1}
-        height={0.5}
-        lineHeight={0.5}
-        letterSpacing={-0.06}
-        size={1.5}
-        font="fonts/InterBold.json">
-        {"Pixieland"}
-        <meshNormalMaterial />
-      </Text3D>
-    </Center>
+    <Float speed={2} floatIntensity={1} {...props}>
+      <Plane args={[1, 1]}>
+        <MeshWobbleMaterial
+          attach="material"
+          factor={.2} // Strength, 0 disables the effect (default=1)
+          speed={5} // Speed (default=1)
+          roughness={0}
+          map={texture}
+          transparent
+        />
+      </Plane>
+    </Float>
   )
 }
 
@@ -73,22 +73,27 @@ const lineHeight = 0.7
 
 
 function Scoreboard({ level, pixi, children, ...props }) {
+  const [score, setScore] = useState(0)
+  useEffect(() => {
+    window.setTimeout(() => {
+      setScore(score + Math.round(Math.random() * 10))
+    }, 1000)
+  }, [score])
   return (
-    <group {...props}>
-      <ambientLight intensity={1} />
-      <Center {...props}>
+    <mesh {...props}>
+      <Center position={[0, 3.5, -2]}>
         <Text3D
           curveSegments={32}
           bevelEnabled
           bevelSize={0.04}
           bevelThickness={0.1}
-          height={0.5}
+          height={1.5}
           lineHeight={0.5}
           letterSpacing={-0.06}
           size={1.5}
           font="fonts/InterBold.json">
           {"Pixieland"}
-          <MeshReflectorMaterial metalness={2} color={pixi.color} />
+          <meshNormalMaterial />
         </Text3D>
       </Center>
       <mesh {...props}>
@@ -112,6 +117,9 @@ function Scoreboard({ level, pixi, children, ...props }) {
           <Text position={[-9, -lineHeight, 1]} fontSize={fontSize} color="white" anchorX="left" anchorY="middle">
             {`NFT:\t${levels[level - 1].replace('img/bkg/', '').replace('.jpg', '')}`}
           </Text>
+          <Text position={[-9, -(lineHeight * 2), 1]} fontSize={fontSize} color="white" anchorX="left" anchorY="middle">
+            {`Score:\t${score}`}
+          </Text>
           <Text position={[5, 0, 1]} fontSize={fontSize} color="white" anchorX="left" anchorY="middle">
             {`Pixi:\t${pixi.color}`}
           </Text>
@@ -124,6 +132,6 @@ function Scoreboard({ level, pixi, children, ...props }) {
         </group>
       </mesh>
       {children}
-    </group>
+    </mesh>
   )
 }

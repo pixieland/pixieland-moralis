@@ -45,7 +45,7 @@ export default function Game() {
                 <pointLight castShadow intensity={0.8} position={[100, 100, 100]} />
                 <Physics gravity={[0, -30, 0]} colliders={false}>
                     <Ground image={"/img/log.png"} />
-                    <Gallery radius={COUNT} items={levels.slice(randomIndex(levels) - COUNT, COUNT)} onSelect={navigate} />
+                    <Gallery radius={COUNT} items={levels.slice(0, COUNT)} onSelect={navigate} />
                     <Player>
                         <Pixi />
                     </Player>
