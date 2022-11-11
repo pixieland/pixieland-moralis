@@ -35,7 +35,7 @@ function App() {
           setETHAddress={setETHAddress}
           setEthProvider={setEthProvider}
           setContractNFT={setContractNFT} />
-          <Marketplace contractNFT={contractNFT} />
+          <Marketplace ethaddress={ethaddress} contractNFT={contractNFT} />
         </>
       </Route>
       <Route path="/">

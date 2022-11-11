@@ -17,6 +17,7 @@ export default function Navbar({ ethaddress, setETHAddress, setEthProvider, setC
     setETHAddress(address);
 
     const contractNFT = new ethers.Contract(CONTRACT_ADDRESS_PIXIENFT, PIXIENFT_ABI, signer);
+    console.log(contractNFT)
     setContractNFT(contractNFT);
   }
 
