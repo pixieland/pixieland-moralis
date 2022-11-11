@@ -1,27 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 
+import { CONTRACT_ADDRESS_PIXIENFT }  from '../contractdata/config';
+
 export default function Marketplace({ ethaddress, contractNFT }) {
   const [pixies, setPixies] = useState([
     "https://raw.githubusercontent.com/pixieland/pixieland-moralis/website/src/images/pixie1.png",
     "https://raw.githubusercontent.com/pixieland/pixieland-moralis/website/src/images/pixie2.png"
   ]);
 
-  // useEffect(() => {
-  //   const getNFTs = async () => {
-  //     try{
-       
-  //       const nft = await fetch(`https://api.covalenthq.com/v1/80001/address/${ethaddress}/balances_v2/?quote-currency=USD&format=JSON&nft=false&no-nft-fetch=false&key=`);
-  //       const { data } = await nft.json();
-  //       console.log(data)
-  //       //setPixies(data);
-  //     }
-  //     catch(err) {
-  //       console.error(err);
-  //     }
-  //   }
-  //   if(contractNFT) getNFTs();
-  // }, [contractNFT])
+  useEffect(() => {
+    const options = {method: 'GET', headers: {accept: 'application/json', 'X-API-Key': 'test'}};
+
+    fetch(`https://deep-index.moralis.io/api/v2/${ethaddress}/nft?chain=mumbai&format=decimal&token_addresses=${CONTRACT_ADDRESS_PIXIENFT}`, options)
+      .then(response => response.json())
+      .then(response => {
+        console.log(response);
+        setPixies(response.result);
+      })
+      .catch(err => console.error(err));
+  }, [])
   
   const buyNFT = async (id) => {
     try{
